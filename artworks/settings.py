@@ -81,7 +81,15 @@ WSGI_APPLICATION = 'artworks.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    "default": env.db(),
+    #"default": env.db(),
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": env('NAME'),
+        "USER": env('USER'),
+        "PASSWORD": env('PASSWORD'),
+        "HOST": env('HOST'),
+        "PORT": env('PORT'),
+    }
     }
 
 # AUTH_USER_MODEL = 'collection.User'
