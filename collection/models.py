@@ -24,14 +24,14 @@ class Style(models.Model):
 
 
 class Period(models.Model):
-    name = models.CharField(max_length=40, unique=True)
+    name = models.CharField(max_length=200, unique=True)
     def __str__(self):
         return self.name
 
 
 class Artwork(models.Model):
     author = models.ForeignKey(Artist, on_delete=models.RESTRICT)
-    path = models.CharField(max_length=200)
+    path = models.CharField(max_length=200, unique=True)
     title = models.CharField(max_length=200)
     date = models.CharField(max_length=40, null=True)
     style = models.ForeignKey(Style, null=True, on_delete=models.RESTRICT)

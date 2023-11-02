@@ -90,7 +90,7 @@ for a in artworks:
                 sql = "SELECT id FROM collection_genre WHERE name = %s"
                 cur.execute(sql, (row[6],))
                 genre_id = cur.fetchone()[0]
-                #print("genre: "+ str(row[7]) + "genreid:" + str(genre_id))
+                print("genre: "+ str(row[7]) + "genreid:" + str(genre_id))
 
             # artwork
             sql = """INSERT INTO collection_artwork (author_id, path, title,
@@ -99,7 +99,7 @@ for a in artworks:
             ON CONFLICT (path)
             DO NOTHING;"""
             print(str(author_id) +' - ' + row[1] +' - ' +  row[2] +' - ' +  row[3] +' - ' +  str(style_id) +' - ' +  str(period_id) +' - ' +  str(genre_id) +' - ' +  row[7])
-            cur.execute(sql, (author_id, row[1], row[2], row[3], style_id, period_id, genre_id, row[7]))
-conn.commit()
+            cur.execute(sql, ((author_id), row[1], row[2], row[3], (style_id), (period_id), (genre_id), row[7] ))
 
-#load_folder()
+
+conn.commit()
