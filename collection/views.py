@@ -3,21 +3,31 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login
-from collection.models import Artwork
+from collection.models import Artwork,Period,Genre
 from django.views.generic.list import ListView
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchHeadline
 import random
+from django.db.models import Count
 
 class ArtListView(ListView):
     model = Artwork
     def get_context_data(self, **kws):
         context = super().get_context_data(**kws)
-        context["genre_type"] = (
+        id = Artwork.objects.values("genre")
+        #context["genre_type"] = (
+        #    Genre.objects.filter(id__in=id)
+        #)
+        context["genre_type"] = ( 
+            #Genre.objects.filter(id__in=id).values("name"),
             Artwork.objects
             .values("genre")
-            #.annotate(count = Count("id"))
+            .annotate(count = Count("id"))
+            
         )
-        return context
+        print(id)
+        print(context["genre_type"])
+        
+        return (context)
         #return render(request, 'collection/index.html', {'artwork': random_artwork})
 
 
@@ -55,11 +65,20 @@ def home(request):
     return render(request, "collection/artwork_list.html", {"queryset": qs})
 
 def index(request):   
-    count = Artwork.objects.count()
+    artwork = Artwork.objects.all()
     random_artwork = None
-    if count > 0:
-        random_index = random.randint(0, count - 1)
-        random_artwork = Artwork.objects.all()[random_index]
-
-    return render(request, 'collection/index.html', {'artwork': random_artwork})
+    query = request.GET.get("query")
+    if query:
+        artwork = artwork.filter(title__icontains=query)
+    genre = Artwork.objects.values("genre").annotate(count=Count("id"))
+    period = Artwork.objects.values("period").annotate(count=Count("id"))
+    #genres =     
+    #if count > 0:
+    #    random_index = random.randint(0, count - 1)
+    #    random_artwork = Artwork.objects.all()#[random_index]
+    contexts = { "artwork": artwork,
+                 "artwork_genre": genre,
+                 "artwork_period":period
+    }
+    return render(request, 'collection/index.html', {"artwork": artwork})
 

@@ -1,25 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Full Text Search</title>
-  </head>
-  <body>
-      <form>
-           {% csrf_token %}
-          <input type="text" name="query">
-          <input type="submit" value="Search">
-      <form/>
-    {% for object in queryset %}
-    <h2>{{object.title}}</h2>
-    <h2>{{object.genre}}</h2>
-    <h2>{{object.style}}</h2>
-    <h2>---------------</h2>
-    <p>{{object.headline | safe}}</p>
-    {% empty %}
-    <h2>No Results</h2>
-    {% endfor %}
-  </body>
-</html>
+<ul> 
+	<!-- Iterate over object_list -->
+	{% for object in genre_type %} 
+	<!-- Display Objects -->
+	<li>
+      {{ object.genre }} 
+	  ({{ object.count }})
+  </li> 
+
+	<hr/> 
+	<!-- If object_list is empty -->
+	{% empty %} 
+	<li>No objects yet.</li> 
+	{% endfor %} 
+</ul>

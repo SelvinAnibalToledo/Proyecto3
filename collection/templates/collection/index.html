@@ -1,28 +1,54 @@
 {% extends "collection/base.html" %}
 
 {% block content %}
-<div class=" flex justify-center md:mx-auto md:max-w-screen-2xl px-2">
-  {% if user.is_authenticated %}
-  <div class="my-5 bg-slate-200 border-l-4 border-slate-500 text-slate-700 p-6" role="alert">
-    <p class="font-bold">Hola {{user.username}}</p>
-    <p>Aquí podras ver muchas pinturas.</p>
-    <p class="font-bold"> <a class="text-sky-600" href="/accounts/logout"> Termina la sesión </a></p>
-  </div>
-</div>
-
-
-<div class="flex-grid justify-center items-center">
-  <div class="font-sans mx-auto h-[300px] w-[250px] bg-blue-100">
-    <h2 class="font-medium text-center text-xl"> {{artwork.title}} </h2>
-    <h3 class="font-bold text-slate-700  text-center"> {{artwork.author.name}} </h3> 
-    <!-- <img class="mx-auto" src="{{artwork.image_url}}" alt="{{artwork.title}}"> -->
-  </div>
-</div>
-{% else %}
-<div class="my-5 bg-slate-200 border-l-4 border-slate-500 text-slate-700 p-6" role="alert">
-  <p class="font-bold">Hola</p>
-  <p> Por favor <a class="text-sky-600 font-bold" href="/accounts/login"> inicia sesión </a> para ver esta página.</p>
-</div>
-{% endif %}
-</div>
+    <div class=" flex justify-center md:mx-auto md:max-w-screen-2xl px-2">
+            {% if user.is_authenticated %}
+            <div class="my-5 bg-slate-200 border-l-4 border-slate-500 text-slate-700 p-6" role="alert">
+            <p class="font-bold">Hola {{user.username}}</p>
+              <p>Aquí podras ver muchas pinturas.</p>
+              <p class="font-bold"> <a class="text-sky-600" href="/accounts/logout"> Termina la sesión </a></p>
+            </div>
+            <ul> 
+              <!-- Iterate over object_list -->
+              {% for object in object_list %} 
+              <!-- Display Objects -->
+              <li>{{ object.title }}</li> 
+              <li>{{ object.description }}</li> 
+             
+              <hr/> 
+              <!-- If object_list is empty  -->
+              {% empty %} 
+              <li>No objects yet.</li> 
+              {% endfor %} 
+          </ul>
+    <form  method="get" action="">
+    {% csrf_token %}
+    </div class="flex justify-center md:mx-auto md:max-w-screen-2xl px-2">
+      <div class="bg-slate-200 my-5 border-l-4 border-slate-500 text-slate-700 p-6" role="alert">
+      <p class="font-bold w-80">Barra de busqueda: </p>
+        <input class="my-5"  type="text" name="query">
+        <button type="submit" class="mt-6 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 
+                  font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 
+                  focus:outline-none dark:focus:ring-blue-800">
+									Buscar
+				</button>
+        <p class="font-bold text-red-500"> periodos: </p>
+        <p class="font-bold text-red-500"> generos: </p>
+      </div> 
+    <div>
+    </form>
+    </div>
+    {% for object in artwork %}
+     <div class="font-sans max-w-4xl mx-auto">
+        <h2 class="font-medium text-center text-xl"> {{object.title}} </h2>
+        <h3 class="font-bold text-slate-700  text-center" > {{object.author.name}}   </h3>
+        <img class="mx-auto" src="{{object.image_url}}" alt="{{object.title}}">
+     </div>
+     {% endfor %}
+        {% else %}
+        <div class="my-5 bg-slate-200 border-l-4 border-slate-500 text-slate-700 p-6" role="alert">
+          <p class="font-bold">Hola</p>
+          <p > Por favor <a class="text-sky-600 font-bold" href="/accounts/login"> inicia sesión </a> para ver esta página.</p>
+        </div>
+        {% endif %}
 {% endblock content %}
