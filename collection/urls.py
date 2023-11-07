@@ -1,11 +1,12 @@
 from django.urls import path
 from . import views
-from .views import ArtListView
+from .views import GenresListView
+from .views import IndexView
 
 urlpatterns = [
-    path("", views.index, name="index"),
-    path("accounts/profile/", views.index, name="index"),
+    path("", IndexView.as_view()),
+    path("accounts/profile/", IndexView.as_view(), name="index"),
     path("accounts/register/", views.register, name="register"),
     path("selvin",views.home, name="artwork_list"),
-    path("cano",ArtListView.as_view())
+    path("cano",GenresListView.as_view())
 ]

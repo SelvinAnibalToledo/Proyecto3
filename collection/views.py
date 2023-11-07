@@ -3,32 +3,72 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login
+from django.views import View
 from collection.models import Artwork,Period,Genre
 from django.views.generic.list import ListView
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchHeadline
-import random
-from django.db.models import Count
+from django.db.models import Count, Subquery, OuterRef
 
-class ArtListView(ListView):
-    model = Artwork
+class GenresListView(ListView):
+    model=Artwork
+    
     def get_context_data(self, **kws):
         context = super().get_context_data(**kws)
-        id = Artwork.objects.values("genre")
-        #context["genre_type"] = (
-        #    Genre.objects.filter(id__in=id)
-        #)
+
+        genres = Genre.objects.filter(id=OuterRef('genre')).values("name")
+        count = Artwork.objects.values("genre").annotate(count = Count("id")).values('count')
+
         context["genre_type"] = ( 
-            #Genre.objects.filter(id__in=id).values("name"),
-            Artwork.objects
-            .values("genre")
-            .annotate(count = Count("id"))
-            
+            count.annotate(name=Subquery(genres)).values('name', 'count')
         )
-        print(id)
+
         print(context["genre_type"])
         
-        return (context)
-        #return render(request, 'collection/index.html', {'artwork': random_artwork})
+        return context
+
+
+class IndexView(ListView):
+    model = Artwork
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        Art_genre = self.request.GET.get("artwork_genre")
+        print(Art_genre)
+
+        if Art_genre:
+            qs = qs.filter(genre__name=Art_genre)
+        
+        print(qs)
+        return qs
+
+    def get_context_data(self, request):
+        artwork = self.get_queryset
+        query = request.GET.get("query")
+        if query:
+            artwork = Artwork.objects.filter(title__icontains=query)
+
+        
+        genre = Genre.objects.filter(id=OuterRef('genre')).values("name")
+        count = Artwork.objects.values("genre").annotate(count = Count("id")).values('count')
+        
+        genres = count.annotate(name=Subquery(genre)).values('name', 'count')
+
+        period = Artwork.objects.values("period").annotate(count=Count("id"))
+
+        print(genres)
+        
+        context = { "artwork": artwork,
+                    "artwork_genre": genres,
+                    "artwork_period":period
+        }
+
+        return context
+    
+    def get(self, request):
+        context = self.get_context_data(request=request)
+        return render(request, 'collection/index.html', context=context)
+
+
 
 
 def register(request):
@@ -66,19 +106,27 @@ def home(request):
 
 def index(request):   
     artwork = Artwork.objects.all()
-    random_artwork = None
+
     query = request.GET.get("query")
     if query:
         artwork = artwork.filter(title__icontains=query)
-    genre = Artwork.objects.values("genre").annotate(count=Count("id"))
+
+    
+    genre = Genre.objects.filter(id=OuterRef('genre')).values("name")
+    count = Artwork.objects.values("genre").annotate(count = Count("id")).values('count')
+    
+    genres = count.annotate(name=Subquery(genre)).values('name', 'count')
+
     period = Artwork.objects.values("period").annotate(count=Count("id"))
+
+    print(genres)
     #genres =     
     #if count > 0:
     #    random_index = random.randint(0, count - 1)
     #    random_artwork = Artwork.objects.all()#[random_index]
-    contexts = { "artwork": artwork,
-                 "artwork_genre": genre,
+    context = { "artwork": artwork,
+                 "artwork_genre": genres,
                  "artwork_period":period
     }
-    return render(request, 'collection/index.html', {"artwork": artwork})
+    return render(request, 'collection/index.html', context=context)
 
