@@ -12,7 +12,7 @@
   <form method="get" action="">
     {% csrf_token %}
 </div class="flex justify-center md:mx-auto md:max-w-screen-2xl px-2">
-<div class="bg-slate-200 my-5 border-l-4 border-slate-500 text-slate-700 p-6" role="alert">
+<div class="bg-yellow-400 my-5 border-l-4 border-slate-500 text-slate-700 p-6" role="alert">
   <p class="font-bold w-80">Barra de busqueda: </p>
   <input class="my-5" type="text" name="query">
   <button type="submit" class="mt-6 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 
@@ -22,6 +22,9 @@
   </button>
   <p class="font-bold text-red-500"> periodos: </p>
   <p class="font-bold text-red-500"> generos: </p>
+  <div class="bg-red-700 my-5 border-l-4 border-blue-500 w-[150px] h-[150px]">
+    Hola
+  </div>
   <ul>
     {% for genre in artwork_genre%}
     <li>
