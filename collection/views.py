@@ -39,11 +39,11 @@ class IndexView(ListView):
             qs = qs.filter(genre__name=Art_genre)
         
         print(qs)
-        return qs
+        return qs[:10]
 
     def get_context_data(self, request):
         artwork = self.get_queryset
-        query = request.GET.get("query")
+        query = request.GET.get("search")
         if query:
             artwork = Artwork.objects.filter(title__icontains=query)
 

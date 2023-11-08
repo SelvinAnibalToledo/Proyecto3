@@ -1,55 +1,30 @@
 {% extends "collection/base.html" %}
 
 {% block content %}
-<div class=" flex justify-center md:mx-auto md:max-w-screen-2xl px-2">
-  {% if user.is_authenticated %}
-  <div class="my-5 bg-slate-200 border-l-4 border-slate-500 text-slate-700 p-6" role="alert">
-    <p class="font-bold">Hola {{user.username}}</p>
-    <p>Aquí podras ver muchas pinturas.</p>
-    <p class="font-bold"> <a class="text-sky-600" href="/accounts/logout"> Termina la sesión </a></p>
-  </div>
+<div class="flex flex-wrap w-full">
 
-  <form method="get" action="">
-    {% csrf_token %}
-</div class="flex justify-center md:mx-auto md:max-w-screen-2xl px-2">
-<div class="bg-yellow-400 my-5 border-l-4 border-slate-500 text-slate-700 p-6" role="alert">
-  <p class="font-bold w-80">Barra de busqueda: </p>
-  <input class="my-5" type="text" name="query">
-  <button type="submit" class="mt-6 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 
-                  font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 
-                  focus:outline-none dark:focus:ring-blue-800">
-    Buscar
-  </button>
-  <p class="font-bold text-red-500"> periodos: </p>
-  <p class="font-bold text-red-500"> generos: </p>
-  <div class="bg-red-700 my-5 border-l-4 border-blue-500 w-[150px] h-[150px]">
-    Hola
+  <div class="w-3/4 grid-cols-3">
+    
+  {% for object in artwork %}
+  <div class="font-sans w-[300px] h-[400px] mx-auto">
+    <h2 class="font-medium text-center text-xl"> {{object.title}} </h2>
+    <h3 class="font-bold text-slate-700  text-center"> {{object.author.name}} </h3>
+    <img class="mx-auto" src="{{object.image_url}}" alt="{{object.title}}">
   </div>
-  <ul>
-    {% for genre in artwork_genre%}
-    <li>
-      <a href="?artwork_genre={{genre.name}}">
-        {{ genre.name }}
-        ({{ genre.count }}) 
-      </a>
-    </li>
-    {% endfor %}
-  </ul>
+  {% endfor %}
+  </div>
+  <div class="bg-slate-300 my-5 w-[200px] h-fit border-l-4 border-slate-500 text-slate-700 p-6" role="alert">
+    <p class="font-bold text-red-500"> generos: </p>
+    <ul>
+      {% for genre in artwork_genre%}
+      <li>
+        <a href="?artwork_genre={{genre.name}}">
+          {{ genre.name }}
+          ({{ genre.count }}) 
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
 </div>
-<div>
-  </form>
-</div>
-{% for object in artwork %}
-<div class="font-sans max-w-4xl mx-auto">
-  <h2 class="font-medium text-center text-xl"> {{object.title}} </h2>
-  <h3 class="font-bold text-slate-700  text-center"> {{object.author.name}} </h3>
-  <img class="mx-auto" src="{{object.image_url}}" alt="{{object.title}}">
-</div>
-{% endfor %}
-{% else %}
-<div class="my-5 bg-slate-200 border-l-4 border-slate-500 text-slate-700 p-6" role="alert">
-  <p class="font-bold">Hola</p>
-  <p> Por favor <a class="text-sky-600 font-bold" href="/accounts/login"> inicia sesión </a> para ver esta página.</p>
-</div>
-{% endif %}
 {% endblock content %}

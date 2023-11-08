@@ -1,11 +1,92 @@
 {% load static %}
-<div class=" flex justify-center md:mx-auto md:max-w-screen-xl px-2">
-  <div class="mt-6 mx-auto">
-     <a class="" href="/">
-        <span class="sr-only">Artworks</span>
-        <img class="h-20 w-auto" src="{% static 'img/logo.jpeg' %}" 
-                alt="artworks">
-     </a>
-  </div>
-</div>
 
+<nav class="bg-white p-1">
+   <div class="container mx-auto flex justify-between items-center">
+      <a class="justify-start items-start" href="/">
+         <span class="sr-only">Artworks</span>
+         <img class="h-[80px] w-[110px]" src="{% static 'img/logo.jpeg' %}" alt="artworks">
+      </a>
+
+      <!-- Menú de navegación para pantallas grandes -->
+      <div class="hidden md:flex space-x-4">
+         <a href="/" class="text-primary font-bold hover:text-gray-500">Inicio</a>
+         <a href="#" class="text-primary font-bold hover:text-gray-500">Mis colecciones</a>
+      </div>
+
+      <!-- Barra de búsqueda -->
+      <div class="md:w-1/4">
+         <form action="">
+            <input type="text" name="search" placeholder="Buscar pintura..." class="w-full px-3 py-2 rounded-full border-2 border-gray-400 bg-white text-gray-800 focus:border-secondary focus:ring-secondary">
+         </form>
+      </div>
+
+
+      {% if user.is_authenticated %}
+      <div class="flex space-x-4" id="sesion_info">
+         <div class="flex flex-wrap justify-center items-center">
+            <span class="material-symbols-outlined ">
+               person
+            </span>
+            <p class="text-primary text-center font-semibold">Hola {{user.username}}</p>
+         </div>
+         <a href="/accounts/logout" class="hover:text-gray-500">
+            <div class="items-center justify-center flex flex-wrap border rounded-full border-secondary p-2">
+               <span class="material-symbols-outlined">
+                  logout
+               </span>
+               <p class="text-primary text-center hover:text-gray-500 font-semibold">Cerrar sesión</p>
+            </div>
+         </a>
+      </div>
+      {% else %}
+      <a href="/accounts/login" class="hover:text-gray-500">
+         <div class="items-center justify-center flex flex-wrap border rounded-full border-secondary p-2">
+            <span class="material-symbols-outlined">
+               login
+               </span>
+            <p class="text-primary text-center hover:text-gray-500 font-semibold">Iniciar sesión</p>
+         </div>
+      </a>
+      {%endif%}
+
+      <div class="md:hidden">
+         <button id="mobile-menu-button" class="text-primary">
+             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6">
+                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+             </svg>
+         </button>
+     </div>
+     
+     <!-- Menú desplegable para dispositivos móviles (visible en dispositivos móviles) -->
+     <div id="mobile-menu" class="hidden flex-row p-4">
+         <a href="#" class="block p-2 text-primary font-bold hover:text-gray-500">Inicio</a>
+         <a href="#" class="block p-2 text-primary font-bold hover:text-gray-500">Mis colecciones</a>
+     </div>
+
+
+     <script>
+      document.addEventListener('DOMContentLoaded', function() {
+          const mobileMenuButton = document.getElementById('mobile-menu-button');
+          const mobileMenu = document.getElementById('mobile-menu');
+          const sesionInfo = document.getElementById('sesion_info')
+  
+          if (mobileMenuButton && mobileMenu) {
+              mobileMenuButton.addEventListener('click', function() {
+                  mobileMenu.classList.toggle('hidden');
+                  sesionInfo.classList.toggle('hidden');
+              });
+          }
+      });
+  </script>
+  
+   </div>
+   <!-- <div class="h-[40px] w-1/4 flex">
+      <p>Filtrar</p>
+      <select class="w-full h-[30px] text-xs text-center bg-white border-2 border-gray-300 focus:border-blue-500 focus:outline-none focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+         <option value="todas">Categorías</option>
+         <option value="categoria1">Categoría 1</option>
+         <option value="categoria2">Categoría 2</option>
+         <option value="categoria3">Categoría 3</option>
+     </select>
+   </div> -->
+</nav>
