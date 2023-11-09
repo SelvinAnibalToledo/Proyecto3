@@ -4,10 +4,12 @@ from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login
 from django.views import View
-from collection.models import Artwork,Period,Genre
+from collection.models import Artwork,Period,Genre, Artist, Collection
 from django.views.generic.list import ListView
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchHeadline
 from django.db.models import Count, Subquery, OuterRef
+import random
+from .forms import CollectionForm
 
 class GenresListView(ListView):
     model=Artwork
@@ -31,7 +33,9 @@ class IndexView(ListView):
     model = Artwork
 
     def get_queryset(self):
-        qs = super().get_queryset()
+        qs = list(super().get_queryset())
+        if qs:
+            qs = random.sample(qs, 10)
         Art_genre = self.request.GET.get("artwork_genre")
         print(Art_genre)
 
@@ -43,6 +47,7 @@ class IndexView(ListView):
 
     def get_context_data(self, request):
         artwork = self.get_queryset
+
         query = request.GET.get("search")
         if query:
             artwork = Artwork.objects.filter(title__icontains=query)
@@ -129,4 +134,48 @@ def index(request):
                  "artwork_period":period
     }
     return render(request, 'collection/index.html', context=context)
+
+def detail_artwork(request, path):
+    #print(path)
+    artwork = Artwork.objects.get(path='/en/'+path)
+    context = {'artwork': artwork}
+    #print(artwork)
+    #print(path)
+    return render(request, 'collection/artwork_detail.html',context=context)
+
+def artist_detail(request,slug):
+    artist = Artist.objects.get(slug=slug)
+    context = {'artist': artist}
+    return render(request, "collection/artist_detail.html", context=context)
+
+def collections(request):
+    collections = Collection.objects.filter(owner=request.user)
+    return render(request, 'collection/collections.html',
+                  {'collections': collections})
+
+
+def collection_list(request):
+    collections = Collection.objects.filter(owner=request.user)
+    return render(request, 'collection/collection_list.html',
+                  {'collections': collections})
+
+
+def collection_add(request):
+    form = None
+    if request.method == 'POST':
+        form = CollectionForm(request.POST)
+        if form.is_valid():
+            name = form.cleaned_data['name']
+            description = form.cleaned_data['description']
+            collection = Collection(
+                    name=name,
+                    description=description,
+                    owner=request.user)
+            collection.save()
+            return HttpResponse(status=204,
+                                headers={'HX-Trigger': 'listChanged'})
+
+    return render(request,
+                  'collection/collection_form.html',
+                  {'form': form})
 
