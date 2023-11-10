@@ -149,13 +149,20 @@ def artist_detail(request,slug):
     return render(request, "collection/artist_detail.html", context=context)
 
 def collections(request):
-    collections = Collection.objects.filter(owner=request.user)
+    print(request.user)
+    if request.user.is_authenticated:
+        collections = Collection.objects.filter(owner=request.user)
+    else:
+        collections = ''      
     return render(request, 'collection/collections.html',
                   {'collections': collections})
 
 
 def collection_list(request):
-    collections = Collection.objects.filter(owner=request.user)
+    if request.user.is_authenticated:
+        collections = Collection.objects.filter(owner=request.user)
+    else:
+        collections = ''   
     return render(request, 'collection/collection_list.html',
                   {'collections': collections})
 
@@ -179,3 +186,48 @@ def collection_add(request):
                   'collection/collection_form.html',
                   {'form': form})
 
+def collection_modifyrecovery(request, id):
+    form = None
+    if request.method == 'GET':
+        collection = Collection.objects.get(id=id)
+        #form = CollectionForm(request.GET)
+        form = CollectionForm(initial={'name': collection.name, 'description': collection.description
+                                 , 'owner': id})
+    return render(request,
+                  'collection/collection_form1.html',
+                  {'form':form})
+
+def collection_modify(request, id):
+    collection = Collection.objects.get(id=id)
+    form = CollectionForm(initial={'name': collection.name, 'description': collection.description
+                                 , 'owner': id})
+    if request.method == 'POST':
+        form = CollectionForm(request.POST)   
+        if form.is_valid():  
+            try:
+                print("Estoy dentro: ")
+                name = form.cleaned_data['name']
+                description = form.cleaned_data['description']
+                collection = Collection(
+                    name=name,
+                    description=description,
+                    owner=request.user)
+                collection.save()
+                model = form.instance
+                return HttpResponse(status=204,
+                                headers={'HX-Trigger': 'listChanged'})
+            except Exception as e: 
+                pass   
+        
+    return render(request,
+                  'collection/collection_form1.html',
+                  {'form':form,'collection':collection})
+
+def collection_delete(request, id):
+    collection = Collection.objects.get(id=id)
+    try:
+        collection.delete()
+    except:
+        pass
+    return HttpResponse(status=204,
+                                headers={'HX-Trigger': 'listChanged'})
