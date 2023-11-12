@@ -33,16 +33,17 @@ class IndexView(ListView):
     model = Artwork
 
     def get_queryset(self):
-        qs = list(super().get_queryset())
+        qs2 = super().get_queryset()
+        qs = list(qs2)
+        
         if qs:
             qs = random.sample(qs, 10)
         Art_genre = self.request.GET.get("artwork_genre")
         print(Art_genre)
 
         if Art_genre:
-            qs = qs.filter(genre__name=Art_genre)
+            qs = list(qs2.filter(genre__name=Art_genre))
         
-        print(qs)
         return qs[:10]
 
     def get_context_data(self, request):
@@ -98,15 +99,6 @@ def home(request):
     query = request.GET.get("query")
     if query:
         qs = qs.filter(title__icontains=query)
-        #qs = Artwork.objects.annotate(search=SearchVector("title")).filter(search=SearchQuery(query))
-        #qs = Artwork.objects.annotate(
-        #    headline=SearchHeadline(
-        #        "title",
-        #        SearchQuery(query),
-        #        start_sel="<b><u><i>",
-        #        stop_sel="</i></u></b>",
-        #    )
-        #)
     return render(request, "collection/artwork_list.html", {"queryset": qs})
 
 def index(request):   
@@ -123,12 +115,9 @@ def index(request):
     genres = count.annotate(name=Subquery(genre)).values('name', 'count')
 
     period = Artwork.objects.values("period").annotate(count=Count("id"))
-
+    print(artwork)
     print(genres)
-    #genres =     
-    #if count > 0:
-    #    random_index = random.randint(0, count - 1)
-    #    random_artwork = Artwork.objects.all()#[random_index]
+    print(period)
     context = { "artwork": artwork,
                  "artwork_genre": genres,
                  "artwork_period":period
@@ -152,6 +141,12 @@ def collections(request):
     print(request.user)
     if request.user.is_authenticated:
         collections = Collection.objects.filter(owner=request.user)
+        for collection in collections:
+            print(f"Collection Name: {collection.name}")
+
+            # Itera sobre los artworks en la colección
+            for artwork in collection.artworks.all():
+                print(f"Artwork Title: {artwork.title}")
     else:
         collections = ''      
     return render(request, 'collection/collections.html',
@@ -167,8 +162,10 @@ def collection_list(request):
                   {'collections': collections})
 
 
+
 def collection_add(request):
-    form = None
+    form= None
+
     if request.method == 'POST':
         form = CollectionForm(request.POST)
         if form.is_valid():
@@ -181,47 +178,34 @@ def collection_add(request):
             collection.save()
             return HttpResponse(status=204,
                                 headers={'HX-Trigger': 'listChanged'})
+        
+    context ={
+        "form":form
+    }
 
     return render(request,
                   'collection/collection_form.html',
-                  {'form': form})
+                  context)
 
-def collection_modifyrecovery(request, id):
-    form = None
-    if request.method == 'GET':
-        collection = Collection.objects.get(id=id)
-        #form = CollectionForm(request.GET)
-        form = CollectionForm(initial={'name': collection.name, 'description': collection.description
-                                 , 'owner': id})
-    return render(request,
-                  'collection/collection_form1.html',
-                  {'form':form})
 
 def collection_modify(request, id):
     collection = Collection.objects.get(id=id)
-    form = CollectionForm(initial={'name': collection.name, 'description': collection.description
-                                 , 'owner': id})
-    if request.method == 'POST':
-        form = CollectionForm(request.POST)   
-        if form.is_valid():  
-            try:
-                print("Estoy dentro: ")
-                name = form.cleaned_data['name']
-                description = form.cleaned_data['description']
-                collection = Collection(
-                    name=name,
-                    description=description,
-                    owner=request.user)
-                collection.save()
-                model = form.instance
+    form = CollectionForm(request.POST or None, instance=collection)
+
+    if request.method == "POST":
+        if form.is_valid():
+                collection = form.save()
                 return HttpResponse(status=204,
-                                headers={'HX-Trigger': 'listChanged'})
-            except Exception as e: 
-                pass   
-        
-    return render(request,
-                  'collection/collection_form1.html',
-                  {'form':form,'collection':collection})
+                                    headers={'HX-Trigger': 'listChanged'})
+            
+
+    context ={
+        "form":form,
+        "collection":collection
+    }
+
+    return render(request, "collection/collection_form.html", context)
+
 
 def collection_delete(request, id):
     collection = Collection.objects.get(id=id)

@@ -1,18 +1,35 @@
 {% for collection in collections %}
-            <tr>
-              <td class="whitespace-nowrap py-4 pl-4
+<tr>
+  <td class="whitespace-nowrap py-4 pl-4
                         pr-3 text-sm font-medium 
                         text-gray-900 sm:pl-0">{{collection.name}}</td>
-              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{collection.description}}</td>
-              <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
-                <button type="button" class="block rounded-md bg-green-600 px-3
+  <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{collection.description}}</td>
+  <td class="whitespace-nowrap py-4 pl-4
+              pr-3 text-sm font-medium 
+              text-gray-900 sm:pl-0">
+          {% if collection.artworks.all %}
+              <ul>
+                  {% for artwork in collection.artworks.all %}
+                      <li>{{ artwork.title }}</li>
+                  {% endfor %}
+              </ul>
+          {% else %}
+              <p>No hay artworks en esta collection.</p>
+          {% endif %}
+  </td>
+  <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
+    <button type="button" class="block rounded-md bg-green-600 px-3
                     py-2 text-center text-sm font-semibold text-black 
                     shadow-sm hover:bg-green-500 focus-visible:outline 
                     focus-visible:outline-2 focus-visible:outline-offset-2 
-                    focus-visible:outline-green-600"
-                   hx-get="/collection/modify/{{collection.id}}" hx-target="body" hx-swap="beforeend" 
-                    >Editar</button>
-                
-              </td>
-            </tr>
+                    focus-visible:outline-green-600" hx-get="{% url 'collection_modify' collection.id %}"
+      hx-target="body" hx-swap="beforeend">Editar</button>
+    <button type="button" class="block rounded-md bg-red-600 px-3
+                    py-2 text-center text-sm font-semibold text-black 
+                    shadow-sm hover:bg-red-500 focus-visible:outline 
+                    focus-visible:outline-2 focus-visible:outline-offset-2 
+                    focus-visible:outline-red-600" hx-post="{% url 'collection_delete' collection.id%}"
+      hx-target="body" hx-swap="beforeend">Delete</button>
+  </td>
+</tr>
 {% endfor %}
