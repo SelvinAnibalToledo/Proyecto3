@@ -215,3 +215,28 @@ def collection_delete(request, id):
         pass
     return HttpResponse(status=204,
                                 headers={'HX-Trigger': 'listChanged'})
+
+def modal_collection(request, id):
+    if request.user.is_authenticated:
+        collections = Collection.objects.filter(owner=request.user)
+        idArtwork = id
+        context ={
+            "collections":collections,
+            "idArtworks":idArtwork
+        }
+    else:
+        collections = ''
+        context = {
+            "collections":collections
+        }  
+    
+    return render(request, "collection/collection_artworks.html", context)
+
+def add_artwork_collection(request, idCollection, idArtwork):
+    collection = Collection.objects.get(id=idCollection)
+    artwork = Artwork.objects.get(id=idArtwork)
+
+    collection.artworks.add(artwork)
+
+    return HttpResponse(status=204,
+                                headers={'HX-Trigger': 'listChanged'})

@@ -13,5 +13,7 @@ urlpatterns = [
     path("collection_list/", views.collection_list, name="collection_list"),
     path("collection/add/", views.collection_add, name="collection_add"),
     path("collection/<int:id>/modify/", views.collection_modify, name="collection_modify"),
-    path("collections/<int:id>/delete/",views.collection_delete, name="collection_delete")
+    path("collections/<int:id>/delete/",views.collection_delete, name="collection_delete"),
+    path("collection/modal/<int:id>", views.modal_collection, name="collection_modal"),
+    path("collection/<int:idCollection>/<int:idArtwork>/", views.add_artwork_collection, name="add_artwork_collection"),
 ]
