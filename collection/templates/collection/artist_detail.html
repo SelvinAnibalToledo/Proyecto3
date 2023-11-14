@@ -2,6 +2,7 @@
 
 {% block content %}
 <div class="flex flex-col items-center">
+  <h2 class="font-bold text-primary text-2xl text-center">Obras creadas por {{artist.name}}</h2>
   {% block artwork %}
   {% include "collection/artwork_list.html" %}
   {% endblock artwork %}

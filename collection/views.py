@@ -18,38 +18,7 @@ class IndexView(ListView):
     context_object_name = 'Artwork'
     template_name = 'collection/index.html'
     paginate_by = 12
-    #paginator_class = MyPaginator
 
-    # def get_queryset(self):
-    #     qs = super().get_queryset()
-    #     print(qs)
-    #     if qs:
-    #         qs = qs.order_by(random.sample(qs,12))
-
-    #     Art_genre = self.request.GET.get("artwork_genre")
-    #     print(Art_genre)
-
-    #     if Art_genre:
-    #         qs = qs.order_by(qs.filter(genre__name=Art_genre))
-        
-    #     return qs
-
-    # def get_context_data(self):
-    #     artworks = self.get_queryset()
-
-    #     genre = Genre.objects.filter(id=OuterRef('genre')).values("name")
-    #     count = Artwork.objects.values("genre").annotate(count = Count("id")).values('count')
-        
-    #     genres = count.annotate(name=Subquery(genre)).values('name', 'count')
-
-
-    #     print(genres)
-    #     print(artworks)
-    #     context = { "artworks": artworks,
-    #                 "artwork_genre": genres,
-    #     }
-
-    #     return context
     def get_queryset(self):
         artworks = Artwork.objects.all()
 
@@ -87,39 +56,6 @@ class IndexView(ListView):
         })
 
         return context
-        # context = super().get_context_data(**kwargs)
-
-        # # Obtener el queryset original asignado por ListView a 'object_list'
-        # artworks = context[self.context_object_name]
-
-        # # Configurar la paginación
-        # paginator = Paginator(artworks, 12)
-        # page_number = self.request.GET.get('page')
-
-        
-
-        # try:
-        #     page_obj = paginator.get_page(page_number)
-        # except PageNotAnInteger:
-        #     # Si la página no es un número entero, mostrar la primera página
-        #     page_obj = paginator.get_page(1)
-        # except EmptyPage:
-        #     # Si la página está fuera de rango, mostrar la última página
-        #     page_obj = paginator.get_page(paginator.num_pages)
-
-        # print(paginator.num_pages)
-
-        # context.update({
-        #     'artwork_genre':genres,
-        #     'artworks': page_obj,
-        #     'paginator': paginator,
-        # })
-
-        # return context
-
-    # def get(self, request):
-    #     context = self.get_context_data(request=request)
-    #     return render(request, 'collection/index.html', context=context)
 
 
 
