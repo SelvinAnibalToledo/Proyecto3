@@ -1,6 +1,5 @@
 from django.urls import path
 from . import views
-from .views import GenresListView
 from .views import IndexView
 
 urlpatterns = [
@@ -16,4 +15,5 @@ urlpatterns = [
     path("collections/<int:id>/delete/",views.collection_delete, name="collection_delete"),
     path("collection/modal/<int:id>", views.modal_collection, name="collection_modal"),
     path("collection/<int:idCollection>/<int:idArtwork>/", views.add_artwork_collection, name="add_artwork_collection"),
+    path("artworks/search/", views.search_artworks, name="search_artworks"),
 ]

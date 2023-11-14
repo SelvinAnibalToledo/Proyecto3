@@ -1,0 +1,18 @@
+<!-- Mostrar la paginación -->
+<div class="pagination">
+    <span class="step-links">
+        {% if artwork.has_previous %}
+            <a href="?page=1">&laquo; primera</a>
+            <a href="?page={{ artwork.previous_page_number }}">anterior</a>
+        {% endif %}
+
+        <span class="current">
+            Página {{ artwork.number }} de {{ artwork.paginator.num_pages }}.
+        </span>
+
+        {% if artwork.has_next %}
+            <a href="?page={{ artwork.next_page_number }}">siguiente</a>
+            <a href="?page={{ artwork.paginator.num_pages }}">última &raquo;</a>
+        {% endif %}
+    </span>
+</div>

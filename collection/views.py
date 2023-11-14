@@ -10,69 +10,116 @@ from django.contrib.postgres.search import SearchVector, SearchQuery, SearchHead
 from django.db.models import Count, Subquery, OuterRef
 import random
 from .forms import CollectionForm
-
-class GenresListView(ListView):
-    model=Artwork
-    
-    def get_context_data(self, **kws):
-        context = super().get_context_data(**kws)
-
-        genres = Genre.objects.filter(id=OuterRef('genre')).values("name")
-        count = Artwork.objects.values("genre").annotate(count = Count("id")).values('count')
-
-        context["genre_type"] = ( 
-            count.annotate(name=Subquery(genres)).values('name', 'count')
-        )
-
-        print(context["genre_type"])
-        
-        return context
-
+from django.contrib.postgres import search
+from django.core.paginator import Paginator,EmptyPage, PageNotAnInteger
 
 class IndexView(ListView):
     model = Artwork
+    context_object_name = 'Artwork'
+    template_name = 'collection/index.html'
+    paginate_by = 12
+    #paginator_class = MyPaginator
 
-    def get_queryset(self):
-        qs2 = super().get_queryset()
-        qs = list(qs2)
+    # def get_queryset(self):
+    #     qs = super().get_queryset()
+    #     print(qs)
+    #     if qs:
+    #         qs = qs.order_by(random.sample(qs,12))
+
+    #     Art_genre = self.request.GET.get("artwork_genre")
+    #     print(Art_genre)
+
+    #     if Art_genre:
+    #         qs = qs.order_by(qs.filter(genre__name=Art_genre))
         
-        if qs:
-            qs = random.sample(qs, 10)
+    #     return qs
+
+    # def get_context_data(self):
+    #     artworks = self.get_queryset()
+
+    #     genre = Genre.objects.filter(id=OuterRef('genre')).values("name")
+    #     count = Artwork.objects.values("genre").annotate(count = Count("id")).values('count')
+        
+    #     genres = count.annotate(name=Subquery(genre)).values('name', 'count')
+
+
+    #     print(genres)
+    #     print(artworks)
+    #     context = { "artworks": artworks,
+    #                 "artwork_genre": genres,
+    #     }
+
+    #     return context
+    def get_queryset(self):
+        artworks = Artwork.objects.all()
+
         Art_genre = self.request.GET.get("artwork_genre")
-        print(Art_genre)
 
         if Art_genre:
-            qs = list(qs2.filter(genre__name=Art_genre))
-        
-        return qs[:10]
+            artworks = artworks.filter(genre__name=Art_genre)
 
-    def get_context_data(self, request):
-        artwork = self.get_queryset
+        print('Tamaño del queryset:', artworks.count())
+        artworks=artworks.order_by('?')
 
-        query = request.GET.get("search")
-        if query:
-            artwork = Artwork.objects.filter(title__icontains=query)
+        return artworks
 
-        
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         genre = Genre.objects.filter(id=OuterRef('genre')).values("name")
         count = Artwork.objects.values("genre").annotate(count = Count("id")).values('count')
         
         genres = count.annotate(name=Subquery(genre)).values('name', 'count')
 
-        period = Artwork.objects.values("period").annotate(count=Count("id"))
+        # Obtener el queryset original asignado por ListView a 'object_list'
+        artworks = self.object_list
 
-        print(genres)
-        
-        context = { "artwork": artwork,
-                    "artwork_genre": genres,
-                    "artwork_period":period
-        }
+        # Configurar la paginación
+        paginator = Paginator(artworks,12)
+        page_number = self.request.GET.get('page')
+
+        # Aplicar paginación
+        page_obj = paginator.get_page(page_number)
+
+        context.update({
+            'artwork_genre':genres,
+            'artworks': page_obj,
+            'paginator': paginator,
+        })
 
         return context
-    
-    def get(self, request):
-        context = self.get_context_data(request=request)
-        return render(request, 'collection/index.html', context=context)
+        # context = super().get_context_data(**kwargs)
+
+        # # Obtener el queryset original asignado por ListView a 'object_list'
+        # artworks = context[self.context_object_name]
+
+        # # Configurar la paginación
+        # paginator = Paginator(artworks, 12)
+        # page_number = self.request.GET.get('page')
+
+        
+
+        # try:
+        #     page_obj = paginator.get_page(page_number)
+        # except PageNotAnInteger:
+        #     # Si la página no es un número entero, mostrar la primera página
+        #     page_obj = paginator.get_page(1)
+        # except EmptyPage:
+        #     # Si la página está fuera de rango, mostrar la última página
+        #     page_obj = paginator.get_page(paginator.num_pages)
+
+        # print(paginator.num_pages)
+
+        # context.update({
+        #     'artwork_genre':genres,
+        #     'artworks': page_obj,
+        #     'paginator': paginator,
+        # })
+
+        # return context
+
+    # def get(self, request):
+    #     context = self.get_context_data(request=request)
+    #     return render(request, 'collection/index.html', context=context)
 
 
 
@@ -94,47 +141,24 @@ def register(request):
 
     return render(request, 'registration/registration_form.html', {'form': f})
 
-def home(request):
-    qs = Artwork.objects.all()
-    query = request.GET.get("query")
-    if query:
-        qs = qs.filter(title__icontains=query)
-    return render(request, "collection/artwork_list.html", {"queryset": qs})
-
-def index(request):   
-    artwork = Artwork.objects.all()
-
-    query = request.GET.get("query")
-    if query:
-        artwork = artwork.filter(title__icontains=query)
-
-    
-    genre = Genre.objects.filter(id=OuterRef('genre')).values("name")
-    count = Artwork.objects.values("genre").annotate(count = Count("id")).values('count')
-    
-    genres = count.annotate(name=Subquery(genre)).values('name', 'count')
-
-    period = Artwork.objects.values("period").annotate(count=Count("id"))
-    print(artwork)
-    print(genres)
-    print(period)
-    context = { "artwork": artwork,
-                 "artwork_genre": genres,
-                 "artwork_period":period
-    }
-    return render(request, 'collection/index.html', context=context)
 
 def detail_artwork(request, path):
     #print(path)
     artwork = Artwork.objects.get(path='/en/'+path)
-    context = {'artwork': artwork}
-    #print(artwork)
-    #print(path)
+    context = {'artworks': artwork}
     return render(request, 'collection/artwork_detail.html',context=context)
 
 def artist_detail(request,slug):
     artist = Artist.objects.get(slug=slug)
-    context = {'artist': artist}
+    artworks = Artwork.objects.filter(author=artist)
+    print(artworks)
+    paginator = Paginator(artworks, 12) 
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    
+    context = {'artist': artist, 
+               "artworks":page_obj}
+    
     return render(request, "collection/artist_detail.html", context=context)
 
 def collections(request):
@@ -240,3 +264,44 @@ def add_artwork_collection(request, idCollection, idArtwork):
 
     return HttpResponse(status=204,
                                 headers={'HX-Trigger': 'listChanged'})
+
+def search_artworks(request):
+    if request.method == 'GET':
+        value = request.GET['search']
+        artworks = ft_artworks(value)
+
+        genre = Genre.objects.filter(id=OuterRef('genre')).values("name")
+        count = Artwork.objects.values("genre").annotate(count = Count("id")).values('count')
+        
+        genres = count.annotate(name=Subquery(genre)).values('name', 'count')
+
+        paginator = Paginator(artworks, 12) 
+        page_number = request.GET.get("page")
+        page_obj = paginator.get_page(page_number)
+        print(artworks)
+        return render(request, 'collection/artwork_search.html',
+                      { 'search_value': value, 
+                       'artworks': page_obj,
+                       'artwork_genre':genres})
+    else:
+        return render(request, 'collection/index.html',
+                      {'artworks': [], 'search_value': None})
+
+
+def ft_artworks(value):
+    vector = (
+        search.SearchVector("title", weight="A")
+        + search.SearchVector("author__name", weight="B")
+        + search.SearchVector("style__name", weight="C")
+        + search.SearchVector("genre__name", weight="C")
+    )
+    query = search.SearchQuery(value, search_type="websearch")
+
+    return (
+        Artwork.objects.annotate(
+            search=vector,
+            rank=search.SearchRank(vector, query),
+        )
+        .filter(search=query)
+        .order_by("-rank")
+    )

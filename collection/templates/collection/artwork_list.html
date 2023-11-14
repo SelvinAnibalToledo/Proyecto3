@@ -1,15 +1,35 @@
-<ul> 
-	<!-- Iterate over object_list -->
-	{% for object in genre_type %} 
-	<!-- Display Objects -->
-	<li>
-      {{ object.name }} 
-	  ({{ object.count }})
-  </li> 
 
-	<hr/> 
-	<!-- If object_list is empty -->
-	{% empty %} 
-	<li>No objects yet.</li> 
-	{% endfor %} 
-</ul>
+{% block artwork %}
+<div class="p-4 grid grid-cols-1 w-full columns-1 lg:gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-center items-center">
+    {% for artwork in artworks %}
+    <div class="flex flex-col">
+      <div class="group relative items-center justify-center h-fit w-fit overflow-hidden rounded-lg">
+        <img class="mx-auto group-hover:scale-125 transition-transform" src="{{artwork.image_url}}" alt="{{artwork.title}}">
+        <div
+          class="absolute inset-0 bg-gradient-to-b from-transparent group-hover:from-black/60 group-hover:via-black/50 group-hover:to-black/60">
+        </div>
+        <div
+          class="absolute inset-0 flex flex-col items-center justify-center px-9 text-center translate-y-[100%] group-hover:translate-y-0 transition-all duration-300">
+          <h1 class="font-bold text-white text-xl">{{artwork.title}}</h1>
+          <p class="text-lg text-white italic">{{artwork.author.name}}</p>
+        </div>
+      </div>
+      <div class="flex flex-row justify-between items-center pt-3">
+        <div class="flex flex-col items-center justify-center">
+          <button type="button" hx-get="{% url 'collection_modal' artwork.id %}" hx-target="body" hx-swap="beforeend">
+            <span class="material-symbols-outlined text-red-500" style="font-size: 30px;">
+              favorite
+            </span>
+          </button>
+        </div>
+        <a href="{{artwork.path}}">
+          <div
+            class="text-primary text-center font-semibold w-[100px] border-2 hover:bg-secondary border-secondary rounded-full">
+            Ver más
+          </div>
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endblock artwork %}

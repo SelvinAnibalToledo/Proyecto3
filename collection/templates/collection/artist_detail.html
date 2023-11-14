@@ -1,8 +1,32 @@
 {% extends "collection/base.html" %}
 
 {% block content %}
-<div>
-  {{artist.name}}
-  {{artist.born_date}}
+<div class="flex flex-col items-center">
+  {% block artwork %}
+  {% include "collection/artwork_list.html" %}
+  {% endblock artwork %}
+  
+  <div class="pagination w-full">
+    <div class="step-links flex flex-col items-center w-full">
+      <div class="flex flex-row w-full justify-around">
+        {% if artworks.has_previous %}
+        <a class="w-[150px] bg-secondary mx-2 text-center rounded-full p-2" href="?search={{ search_value|stringformat:'s'}}&page=1">&laquo; Primera</a>
+        <a class="w-[150px] bg-secondary mx-2 text-center rounded-full p-2"
+          href="?search={{ search_value|stringformat:'s'}}&page={{ artworks.previous_page_number }}">Anterior</a>
+        {% endif %}
+        {% if artworks.has_next %}
+        <a class="w-[150px] bg-secondary text-center rounded-full p-2"
+          href="?search={{ search_value|stringformat:'s'}}&page={{ artworks.next_page_number }}">Siguiente</a>
+        <a class="w-[150px] bg-secondary text-center rounded-full p-2"
+          href="?search={{ search_value|stringformat:'s'}}&page={{ artworks.paginator.num_pages }}">Última &raquo;</a>
+        {% endif %}
+      </div>
+
+      <span class="current">
+        Página {{ artworks.number }} de {{ artworks.paginator.num_pages }}.
+      </span>
+
+    </div>
+  </div>
 </div>
 {% endblock content %}
